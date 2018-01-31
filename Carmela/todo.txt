@@ -1,0 +1,9 @@
+idées pour plus tard : 
+- peaufiner l'algo
+- cross validation
+- etc etc
+
+autres idées :
+- horizon temporel plus court - 1 jour (overfitting)
+- est-ce que j'ai pas surtout intérêt à prédire les gros mouvements (les gros buy ou sells)
+- prédire autre chose
