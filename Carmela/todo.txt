@@ -1,11 +1,11 @@
-- bcp + de données
+- bcp + de données - 100k lignes
+	- par fainéantise j'ai tout pris mais j'ai peur que mon modèle ne soit pas terrible - peut être qu'il y a des trends et que le modèle n'est pas bon 
 - attention overfit, tuning d'algo
-
+- tu définis un score et tu essaies de faire quelque chose 
 
 idées pour plus tard : 
 - peaufiner l'algo
 - cross validation
-- etc etc
 - supprimer les data points extremaux
 
 autres idées :
@@ -14,3 +14,4 @@ autres idées :
 - prédire autre chose
 
 -grosso modo un signal c'est un signal
+j'ai l'impression qu'il y a un signal et qu'il pourrait être intéressant de combiner - stacking - un modèle technical et un modèle fondamental
