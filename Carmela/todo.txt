@@ -1,9 +1,16 @@
+- bcp + de données
+- attention overfit, tuning d'algo
+
+
 idées pour plus tard : 
 - peaufiner l'algo
 - cross validation
 - etc etc
+- supprimer les data points extremaux
 
 autres idées :
 - horizon temporel plus court - 1 jour (overfitting)
 - est-ce que j'ai pas surtout intérêt à prédire les gros mouvements (les gros buy ou sells)
 - prédire autre chose
+
+-grosso modo un signal c'est un signal
