@@ -1,20 +1,30 @@
-- moving average convergence & divergence 
+- faire un test run sur DSS pour voir ce qu'il me raconte sur mes features 
+- modifier y de façon à se concentrer uniquement sur up or down
+- modifier l'horizon temporel de y 
 
-- refacto
-- re-run everything
+- ajouter tous les autres features
+- vérification a la mano que mes features sont bons 
+
+- split_train_test - ATTENTION LE SCALE DOIT ETRE FAIT SUR TRAIN PUIS APPLIQUE SUR TEST
+- rerun
 ____________________________________________________________
 
 - ajouter tous les autres features
-	- moving average convergence & divergence
-	- stochastic KD
-	- relative strength index
-	- larry william's R%
-	- typical price
-	- chaikin money flow indicator
 	- stochastic momentum index 
-	- bollinger signal
 	- chandelles : open / high / low / close
+
+	- typical price
+	- commodity channel index
+	- pivot point
+	- money flow index
 - essayer de faire une prévision directionnelle
+
+- vérifier toutes les features, pénible mais à faire !
+- NB : ema déconne si il y a des nan, les dégager avant de faire le feature engineering
+	- je dégage les NaN
+	- je fais mon FE, les NaN sont au début du truc
+	- je redégage les NaN
+- attention 
 
 idées pour plus tard : 
 - peaufiner l'algo
@@ -26,3 +36,4 @@ autres idées :
 
 plus loin :
 - stacking avec un autre type de modèle
+

@@ -1,0 +1,9 @@
+- out_to_in_BB: True if the spot price went from outside the Bollinger band to the inside of the Bollinger band
+- spike : adjusted close/RM (RM = rolling mean over a window to define)
+- pre_spike : adjusted close/RM of the previous trading day
+- spike_derivative : difference between the two last features
+- crossed_RM_up : yesterday spot was < RM today spot > RM
+- crossed_RM_down : yesterday spot was > RM today spot < RM
+- mom_1 : cumulative return past day
+- mom_5 : cumulative return past 5 days
+- mom_10 : cumulative return past 10 days
