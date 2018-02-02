@@ -20,51 +20,148 @@ def get_df(TICKER):
     return df
 
 def print_info_stock(dataframe):
-    df = dataframe['Adj Close']
     '''
     prints info on the series of the adjusted close of a stock
     visual way to check if everything seems fine
     '''
-    print 'nom      : ' + df.name
-    print 'min date : ' + str(min(df.index))
-    print 'max date : ' + str(max(df.index))
-    print 'nb dates : ' + str(len(df))
-    print 'null     : ' + str(sum(df.isnull()))
+    ac = dataframe['Adj Close']
+    print 'nom      : ' + ac.name
+    print 'min date : ' + str(min(ac.index))
+    print 'max date : ' + str(max(ac.index))
+    print 'nb dates : ' + str(len(ac))
+    print 'null     : ' + str(sum(ac.isnull()))
 
 def build_df(TICKER,window_size=10):
+    '''
+    input : a TICKER
+    output : an 'ML ready' dataframe w/ columns in the categories :
+        - volume
+        - bollinger
+        - momentum
+        - exotic averages
+    '''
+
+
     df = get_df(TICKER)
     df.dropna(inplace=True)
-    ser = df['Adj Close']
+
     features = []
-    features.append(ser)
-    features.append(df_bollinger_features(ser,window_size))
-    features.append(df_momentum(ser))
-    features.append(df_volume(df['Volume']))
-    features.append(y(ser))
+    features.append(df['Adj Close'])
+    features.append(df_bollinger_features(df['Adj Close'],window_size))
+    features.append(df_momentum(df['Adj Close']))
+    features.append(df_volume(df['Volume'],window_size))
+    features.append(df_moving_average(df['Adj Close'],window_size))
+    features.append(y(df['Adj Close']))
+
     df = pd.concat(features, axis=1)
     return df
 
+
 #____________VOLUME____________#
-def df_volume(VOL):
+def df_volume(VOL,window_size=10):
     '''
     input = series of a stock's volum
     output = dataframe w/ columns:
         - vol_mom_1
         - vol_mom_5
         - vol_mom_10
+        - vol_rolling_mean
+        - vol_spike
+        - vol_pr_spike
+        - vol_spike_derivative
         the volume momentums over the last 1, 5 and 10 days
+    MANUALLY CHECKED : OK
     '''
 
+    # momentum
     vol_mom_1 = (VOL/VOL.shift(1)-1)*100
     vol_mom_5 = (VOL/VOL.shift(5)-1)*100
     vol_mom_10 = (VOL/VOL.shift(10)-1)*100
+
+    # spikes
+    vol_rolling_mean = VOL.rolling(window=window_size).mean()
+    vol_spike = VOL/vol_rolling_mean
+    vol_pr_spike = vol_spike.shift(1)
+    vol_spike_derivative = vol_spike - vol_pr_spike
 
     # rename columns
     vol_mom_1 = vol_mom_1.rename('vol_mom_1')
     vol_mom_5 = vol_mom_5.rename('vol_mom_5')
     vol_mom_10 = vol_mom_10.rename('vol_mom_10')
+    vol_rolling_mean = vol_rolling_mean.rename('vol_rolling_mean')
+    vol_spike = vol_spike.rename('vol_spike')
+    vol_pr_spike = vol_pr_spike.rename('vol_pr_spike')
+    vol_spike_derivative = vol_spike_derivative.rename('vol_spike_derivative')
 
-    return pd.concat([vol_mom_1,vol_mom_5,vol_mom_10],axis=1)
+    # list of all vol features
+    vol_features = []
+    vol_features.append(vol_mom_1)
+    vol_features.append(vol_mom_5)
+    vol_features.append(vol_mom_10)
+    vol_features.append(vol_rolling_mean)
+    vol_features.append(vol_spike)
+    vol_features.append(vol_pr_spike)
+    vol_features.append(vol_spike_derivative)
+
+    return pd.concat(vol_features,axis=1)
+
+#____________EXOTIC MOVING AVERAGE____________#
+def df_moving_average(stock, window_size=10):
+    '''
+    input = series of a stock's adjusted close
+    output = dataframe w/ columns:
+        - weighted_average
+        - wa_spike
+        - wa_pr_spike
+        - wa_spike_derivative
+        - exp_average
+        - exp_spike
+        - exp_pr_spike
+        - exp_spike_derivative
+    MANUALLY CHECKED : OK
+    '''
+
+    # weighted average
+    f = lambda x: np.average(x,weights=range(window_size))
+    weighted_average = stock.rolling(window_size).apply(f)
+    wa_spike = stock/weighted_average
+    wa_pr_spike = wa_spike.shift(1)
+    wa_spike_derivative = wa_spike - wa_pr_spike
+
+    # exponential average
+    k = 2./(window_size+1)
+    l = []
+    l.append(stock[0])
+    for i in range(1,len(stock)):
+        ema = round(stock[i]*k+l[-1]*(1-k),2)
+        l.append(ema)
+    exp_average = pd.Series(l,index=stock.index)
+    exp_spike = stock/exp_average
+    exp_pr_spike = exp_spike.shift(1)
+    exp_spike_derivative = exp_spike - exp_pr_spike
+
+    # renaming columns
+    weighted_average = weighted_average.rename('weighted_average')
+    wa_spike = wa_spike.rename('wa_spike')
+    wa_pr_spike = wa_pr_spike.rename('wa_pr_spike')
+    wa_spike_derivative = wa_spike_derivative.rename('wa_spike_derivative')
+    exp_average = exp_average.rename('exp_average')
+    exp_spike = exp_spike.rename('exp_spike')
+    exp_pr_spike = exp_pr_spike.rename('exp_pr_spike')
+    exp_spike_derivative = exp_spike_derivative.rename('exp_spike_derivative')
+
+    # list of all vol features
+    features = []
+    features.append(weighted_average)
+    features.append(wa_spike)
+    features.append(wa_pr_spike)
+    features.append(wa_spike_derivative)
+    features.append(exp_average)
+    features.append(exp_spike)
+    features.append(exp_pr_spike)
+    features.append(exp_spike_derivative)
+
+    return pd.concat(features,axis=1)
 
 
 #____________BOLLINGER____________#
@@ -81,6 +178,7 @@ def df_bollinger_features(stock, window_size):
         - spike_derivative
         - crossed_RM_up
         - crossed_RM_down
+    MANUALLY CHECKED : OK
     '''
 
     # BOLLINGER BANDS
@@ -143,6 +241,7 @@ def df_momentum(stock):
         - mom_1
         - mom_5
         - mom_10
+    MANUALLY CHECKED : OK
     '''
 
     # compute momentums
@@ -162,11 +261,13 @@ def y(stock):
     '''
     input = series of a stock's adjusted close
     output = series of the cumulative return 5 days from now
+    MANUALLY CHECKED : OK
     '''
 
     y = (stock.shift(-5)/stock-1)*100
     y = y.rename('y')
     return y
+
 
 #____________ML_DATA_PREP____________#
 def split_train_test(df1):
@@ -206,6 +307,7 @@ def split_train_test(df1):
 
     return X_train, X_test, Y_train, Y_test
 
+
 #____________RESULTS____________#
 def mae(ypred,ytrue):
     return np.abs(ypred - ytrue).mean()
@@ -237,6 +339,7 @@ def print_results_report(Y_pred,Y_test):
 
     print 'MAE TEST  : ' + str(mae(Y_pred,Y_test))
     print 'MSE TEST  : ' + str(mse(Y_pred,Y_test))
+
 
 #____________LEARNING CURVE____________#
 def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None,

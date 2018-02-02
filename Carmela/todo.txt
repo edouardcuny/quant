@@ -1,10 +1,10 @@
-- VOLUME
-- où en est-on ?
+- moving average convergence & divergence 
+
+- refacto
+- re-run everything
+____________________________________________________________
 
 - ajouter tous les autres features
-	- volume (un dernier effort, quoi faire exactement)
-	- weighted moving average
-	- exponential moving average
 	- moving average convergence & divergence
 	- stochastic KD
 	- relative strength index
