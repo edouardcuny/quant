@@ -1,10 +1,24 @@
-- ranger un peu tout le bordel de façon à ce que ça soit plus rapide
+- VOLUME
+- où en est-on ?
+
 - ajouter tous les autres features
+	- volume (un dernier effort, quoi faire exactement)
+	- weighted moving average
+	- exponential moving average
+	- moving average convergence & divergence
+	- stochastic KD
+	- relative strength index
+	- larry william's R%
+	- typical price
+	- chaikin money flow indicator
+	- stochastic momentum index 
+	- bollinger signal
+	- chandelles : open / high / low / close
 - essayer de faire une prévision directionnelle
 
 idées pour plus tard : 
 - peaufiner l'algo
-- cross validation - pour avoir une vraie erreur moyenne
+- cross validation - pour avoir une vraie erreur moyenne
 - supprimer les data points extremaux
 
 autres idées :

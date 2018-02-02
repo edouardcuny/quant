@@ -7,19 +7,20 @@ from sklearn.model_selection import ShuffleSplit
 
 
 #____________IMPORTS____________#
-def get_series(TICKER):
+def get_df(TICKER):
     '''
     input : a ticker
-    output : pandas series with adjusted close and dates as index
+    output : pandas dataframe with :
+        - open, high, low, close, adjusted close, volume as colums
+        - dates as index
     NB : the csv extract from which we read the data go from 1/1/2012 to 12/31/2017
     '''
     path = "/Users/edouardcuny/Desktop/quant/Carmela/data2/" + TICKER
-    df = pd.read_csv(path, index_col='Date', dtype={'Adj Close': np.float64}, na_values='null')
-    df = df['Adj Close']
-    df = df.rename(TICKER)
+    df = pd.read_csv(path, index_col='Date',dtype={'Adj Close': np.float64}, na_values='null')
     return df
 
-def print_info_stock(df):
+def print_info_stock(dataframe):
+    df = dataframe['Adj Close']
     '''
     prints info on the series of the adjusted close of a stock
     visual way to check if everything seems fine
@@ -30,12 +31,41 @@ def print_info_stock(df):
     print 'nb dates : ' + str(len(df))
     print 'null     : ' + str(sum(df.isnull()))
 
-def get_df(TICKER,window_size=10):
-    ser = get_series(TICKER)
-    #print_info_stock(ser)
-    ser = ser[ser.notnull()]
-    df = pd.concat([ser,df_bollinger_features(ser,window_size),df_momentum(ser),y(ser)], axis=1)
+def build_df(TICKER,window_size=10):
+    df = get_df(TICKER)
+    df.dropna(inplace=True)
+    ser = df['Adj Close']
+    features = []
+    features.append(ser)
+    features.append(df_bollinger_features(ser,window_size))
+    features.append(df_momentum(ser))
+    features.append(df_volume(df['Volume']))
+    features.append(y(ser))
+    df = pd.concat(features, axis=1)
     return df
+
+#____________VOLUME____________#
+def df_volume(VOL):
+    '''
+    input = series of a stock's volum
+    output = dataframe w/ columns:
+        - vol_mom_1
+        - vol_mom_5
+        - vol_mom_10
+        the volume momentums over the last 1, 5 and 10 days
+    '''
+
+    vol_mom_1 = (VOL/VOL.shift(1)-1)*100
+    vol_mom_5 = (VOL/VOL.shift(5)-1)*100
+    vol_mom_10 = (VOL/VOL.shift(10)-1)*100
+
+    # rename columns
+    vol_mom_1 = vol_mom_1.rename('vol_mom_1')
+    vol_mom_5 = vol_mom_5.rename('vol_mom_5')
+    vol_mom_10 = vol_mom_10.rename('vol_mom_10')
+
+    return pd.concat([vol_mom_1,vol_mom_5,vol_mom_10],axis=1)
+
 
 #____________BOLLINGER____________#
 def df_bollinger_features(stock, window_size):
