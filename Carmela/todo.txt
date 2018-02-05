@@ -1,39 +1,34 @@
-- faire un test run sur DSS pour voir ce qu'il me raconte sur mes features 
-- modifier y de façon à se concentrer uniquement sur up or down
-- modifier l'horizon temporel de y 
+- modèle -3 / +3
+- modèle -? / +?
+> gaz finir le pipe proprement
+	- split_train_test - ATTENTION LE SCALE DOIT ETRE FAIT SUR TRAIN PUIS APPLIQUE SUR TEST
+	- suppression des datapoints extremaux
+	- cross validation bien comme il faut
+	- ensembling
 
-- ajouter tous les autres features
+_________________________________________________________
+POUR ALLER + LOIN
 - vérification a la mano que mes features sont bons 
-
-- split_train_test - ATTENTION LE SCALE DOIT ETRE FAIT SUR TRAIN PUIS APPLIQUE SUR TEST
-- rerun
-____________________________________________________________
-
-- ajouter tous les autres features
-	- stochastic momentum index 
+- repenser aux features, est-ce que j'ai été bon, pas bon 
+- ajouter d'autres features 
 	- chandelles : open / high / low / close
-
 	- typical price
 	- commodity channel index
 	- pivot point
 	- money flow index
-- essayer de faire une prévision directionnelle
+- essayer un autre algo, pê que random forest ne s'y prête pas beaucoup
+- modifier l'horizon temporel de y 
+- modifier y pour faire big up big down ou nothing, regarder ce que ça vaut
+_________________________________________________________
+POUR ALLER ENCORE + LOIN
+- features pas assez bons
+- regarder précisément ce que font les mecs dans la littérature
+- modèle pas assez bon
+- pas assez de données
+- le problème est compliqué, définir bon 
+- il y a aussi le problème des skewed classes ! 
+_________________________________________________________
 
-- vérifier toutes les features, pénible mais à faire !
-- NB : ema déconne si il y a des nan, les dégager avant de faire le feature engineering
-	- je dégage les NaN
-	- je fais mon FE, les NaN sont au début du truc
-	- je redégage les NaN
-- attention 
-
-idées pour plus tard : 
-- peaufiner l'algo
-- cross validation - pour avoir une vraie erreur moyenne
-- supprimer les data points extremaux
-
-autres idées :
-- horizon temporel plus court - 1 jour (overfitting)
-
-plus loin :
-- stacking avec un autre type de modèle
-
+NEXT STEPS 
+- LSTM buy/hold/echo state NN
+>> on range et on candidate 
