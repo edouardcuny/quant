@@ -35,19 +35,14 @@ def print_info_stock(dataframe):
 def build_df(TICKER):
     '''
     input : a TICKER
-    output : an 'ML ready' dataframe w/ columns in the categories :
-        - volume
-        - bollinger
-        - momentum
-        - exotic averages
+    output : an 'ML ready' dataframe w/ features in features.txt :
     '''
-
 
     df = get_df(TICKER)
     rows_before = df.shape[0]
     df.dropna(inplace=True)
     rows_after = df.shape[0]
-    print "dropped NA : {} >> {}".format(rows_before,rows_after)
+    print TICKER.split('.')[0] + " - dropped NA : {} >> {}".format(rows_before,rows_after)
 
     # ADDING FEATURES
     features = []
@@ -62,6 +57,14 @@ def build_df(TICKER):
     features.append(fe.y(df['Adj Close']))
 
     df = pd.concat(features, axis=1)
+
+    # WE ADD A COLUMN W/ THE TICKER
+    df['Ticker'] = TICKER.split('.')[0]
+
+    # Rearrange columns to have ticker first
+    cols = df.columns.tolist()
+    cols = cols[-1:] + cols[:-1]
+    df = df[cols]
 
     return df
 
@@ -82,12 +85,15 @@ def delete_extreme_value(df):
     dftr = df.copy()
     # cb j'en ai ?
     for feature in df.columns:
-        std = dftr[feature].std()
-        mean = dftr[feature].mean()
-        if std == 0:
+        if type(feature[0])==str:
             pass
         else:
-            dftr = dftr.loc[(dftr[feature]<mean+4*std)&(dftr[feature]>mean-4*std),:]
+            std = dftr[feature].std()
+            mean = dftr[feature].mean()
+            if std == 0:
+                pass
+            else:
+                dftr = dftr.loc[(dftr[feature]<mean+4*std)&(dftr[feature]>mean-4*std),:]
     rows_after = dftr.shape[0]
     print "dropped extreme values : {} >> {}".format(rows_before,rows_after)
     return dftr
@@ -101,10 +107,6 @@ def split_train_test(df1,date=None):
     NB : a lot of things to change depending on the features you chose
     '''
     df = df1.copy()
-
-    # droping useless columns
-    df.drop([df.columns[0],'rolling_mean'],axis=1,inplace=True)
-    df.drop([df.columns[0],'vol_rolling_mean'],axis=1,inplace=True)
 
     # removing extreme values
     df = delete_extreme_value(df)
@@ -135,13 +137,14 @@ def split_train_test(df1,date=None):
         Y_test = Y[Y.index>date]
 
     # feature rescaling
-
     bool_features = []
     bool_features.append('in_BB')
     bool_features.append('pr_in_BB')
     bool_features.append('out_to_in_BB')
     bool_features.append('crossed_RM_up')
     bool_features.append('crossed_RM_down')
+    bool_features.append('Ticker') # not a bool but not rescalable...
+    bool_features.append('Adj Close') # same 
 
     for column in X.columns:
         if column not in bool_features:
