@@ -1,11 +1,8 @@
-- modèle -3 / +3
-- modèle -? / +?
 > gaz finir le pipe proprement
-	- split_train_test - ATTENTION LE SCALE DOIT ETRE FAIT SUR TRAIN PUIS APPLIQUE SUR TEST
-	- suppression des datapoints extremaux
+	§ split_train_test
+	§ suppression des datapoints extremaux
 	- cross validation bien comme il faut
 	- ensembling
-
 _________________________________________________________
 POUR ALLER + LOIN
 - vérification a la mano que mes features sont bons 
@@ -21,12 +18,9 @@ POUR ALLER + LOIN
 - modifier y pour faire big up big down ou nothing, regarder ce que ça vaut
 _________________________________________________________
 POUR ALLER ENCORE + LOIN
-- features pas assez bons
 - regarder précisément ce que font les mecs dans la littérature
-- modèle pas assez bon
+- modèle pas assez bon, stacking, ensembling
 - pas assez de données
-- le problème est compliqué, définir bon 
-- il y a aussi le problème des skewed classes ! 
 _________________________________________________________
 
 NEXT STEPS 

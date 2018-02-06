@@ -13,10 +13,11 @@ def get_df(TICKER):
     output : pandas dataframe with :
         - open, high, low, close, adjusted close, volume as colums
         - dates as index
-    NB : the csv extract from which we read the data go from 1/1/2012 to 12/31/2017
+    NB : if there is a 0 in the csv we replace it by NA
+    we do this bc we had issues w/ volumes = 0 and data that made no sense
     '''
     path = "/Users/edouardcuny/Desktop/quant/Carmela/data2/" + TICKER
-    df = pd.read_csv(path, index_col='Date',dtype={'Adj Close': np.float64}, na_values='null')
+    df = pd.read_csv(path, index_col='Date',dtype={'Adj Close': np.float64}, na_values=['null',0])
     return df
 
 def print_info_stock(dataframe):
@@ -43,7 +44,10 @@ def build_df(TICKER):
 
 
     df = get_df(TICKER)
+    rows_before = df.shape[0]
     df.dropna(inplace=True)
+    rows_after = df.shape[0]
+    print "dropped NA : {} >> {}".format(rows_before,rows_after)
 
     # ADDING FEATURES
     features = []
@@ -62,9 +66,37 @@ def build_df(TICKER):
     return df
 
 #____________ML_DATA_PREP____________#
-def split_train_test(df1):
+
+def scale(series , mean, std):
     '''
-    input : pandas dataframe of a time series of technical features for a stock
+    input : a Series to rescale
+    output : the rescaled Series
+    '''
+    return (series-mean).astype(np.float64)/std
+
+def delete_extreme_value(df):
+    '''
+    deletes values that are more than 3 std away from the mean
+    '''
+    rows_before = df.shape[0]
+    dftr = df.copy()
+    # cb j'en ai ?
+    for feature in df.columns:
+        std = dftr[feature].std()
+        mean = dftr[feature].mean()
+        if std == 0:
+            pass
+        else:
+            dftr = dftr.loc[(dftr[feature]<mean+4*std)&(dftr[feature]>mean-4*std),:]
+    rows_after = dftr.shape[0]
+    print "dropped extreme values : {} >> {}".format(rows_before,rows_after)
+    return dftr
+
+def split_train_test(df1,date=None):
+    '''
+    input :
+        - pandas dataframe of a time series of technical features for a stock
+        - a date (optional) on which to do the split
     output : X_train,X_test,Y_train,Y_test
     NB : a lot of things to change depending on the features you chose
     '''
@@ -72,15 +104,38 @@ def split_train_test(df1):
 
     # droping useless columns
     df.drop([df.columns[0],'rolling_mean'],axis=1,inplace=True)
+    df.drop([df.columns[0],'vol_rolling_mean'],axis=1,inplace=True)
+
+    # removing extreme values
+    df = delete_extreme_value(df)
 
     # removing rows w/ NaN i.e. first rows and last rows based on window_size
+    rows_before = df.shape[0]
     df.dropna(inplace=True)
+    rows_after = df.shape[0]
+    print "dropped NA : {} >> {}".format(rows_before,rows_after)
 
     # splitting X and Y
     X = df.iloc[:,:-1]
     Y = df.iloc[:,-1]
 
-    # features rescaling
+    # train & test
+    if date is None:
+        split = 0.7
+        n = int(0.7*df.shape[0])
+        X_train = X.iloc[:n,:]
+        X_test = X.iloc[n:,:]
+        Y_train = Y[:n]
+        Y_test = Y[n:]
+
+    else :
+        X_train = X.iloc[X.index<date,:]
+        X_test = X.iloc[X.index>date,:]
+        Y_train = Y[Y.index<date]
+        Y_test = Y[Y.index>date]
+
+    # feature rescaling
+
     bool_features = []
     bool_features.append('in_BB')
     bool_features.append('pr_in_BB')
@@ -88,21 +143,14 @@ def split_train_test(df1):
     bool_features.append('crossed_RM_up')
     bool_features.append('crossed_RM_down')
 
-    from sklearn.preprocessing import scale
     for column in X.columns:
         if column not in bool_features:
-            X.loc[:,column] = scale(X[column])
-    
-    # train & test
-    split = 0.7
-    n = int(0.7*df.shape[0])
-    X_train = X.iloc[:n,:]
-    X_test = X.iloc[n:,:]
-    Y_train = Y[:n]
-    Y_test = Y[n:]
+            mean = X_train.loc[:,column].mean()
+            std = X_train.loc[:,column].std()
+            X_train.loc[:,column] = scale(X_train.loc[:,column], mean, std)
+            X_test.loc[:,column] = scale(X_test.loc[:,column], mean, std)
 
     return X_train, X_test, Y_train, Y_test
-
 
 #____________RESULTS____________#
 def mae(ypred,ytrue):
@@ -135,7 +183,6 @@ def print_results_report(Y_pred,Y_test):
 
     print 'MAE TEST  : ' + str(mae(Y_pred,Y_test))
     print 'MSE TEST  : ' + str(mse(Y_pred,Y_test))
-
 
 #____________LEARNING CURVE____________#
 def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None,

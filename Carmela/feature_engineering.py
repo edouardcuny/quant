@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
+import math
 
 #____________UTILS____________#
-import math
 def ema(stock,window_size):
     '''
     input =
@@ -341,5 +341,8 @@ def y(stock):
     '''
 
     y = (stock.shift(-5)/stock-1)*100
+    y[(y>-2)&(y<2)]=0
+    y[y>0]=1
+    y[y<0]=-1
     y = y.rename('y')
     return y
