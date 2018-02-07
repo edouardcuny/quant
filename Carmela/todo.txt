@@ -1,11 +1,10 @@
 > gaz finir le pipe proprement
 	§ split_train_test
 	§ suppression des datapoints extremaux
-	- cross validation bien comme il faut
-	- ensembling
 _________________________________________________________
 POUR ALLER + LOIN
 - vérification a la mano que mes features sont bons 
+- cross validation bien comme il faut
 - repenser aux features, est-ce que j'ai été bon, pas bon 
 - ajouter d'autres features 
 	- chandelles : open / high / low / close
@@ -21,6 +20,9 @@ POUR ALLER ENCORE + LOIN
 - regarder précisément ce que font les mecs dans la littérature
 - modèle pas assez bon, stacking, ensembling
 - pas assez de données
+
+- d'autres stratégies + évoluées de trading
+- théorie du portefeuille de markowitz
 _________________________________________________________
 
 NEXT STEPS 
