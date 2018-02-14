@@ -90,7 +90,7 @@ def build_alloc(pred):
 
         alloc[i,indices_m_1] = 0
         j=1
-        while i+j<alloc.shape[0] or j<5 :
+        while i+j<alloc.shape[0]-1 and j<5 :
             alloc[i+j,:] = alloc[i,:]
             j+=1
         i+=5
